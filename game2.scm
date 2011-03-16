@@ -75,9 +75,11 @@
   (let ((f (pick-foe input)))
     (when f
 	  (f:hit *attack-strength*)
-	  (unless (foes-dead?)
-		  (display "Foe #:")
-		  (set! *input-fn* last-strike)))))
+	  (if (not (foes-dead?))
+	      (begin
+		(display "Foe #:")
+		(set! *input-fn* last-strike))
+	      (end-attack)))))
 
 (define (last-strike input)
   (let ((f (pick-foe input)))
