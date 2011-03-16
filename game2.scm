@@ -103,26 +103,25 @@
     ((f) (begin
 	   (dotimes (x (+ 1 (randval (quotient *strength* 3))))
 		    (unless (foes-dead?)
-			    (let ((f ::foe (random-foe)))
-			      (f:hit 1))))
+			    ((random-foe):hit 1)))
 	   (end-attack)))
     (else (show-attacks))))
 
 (define (first-strike input)
-  (let ((f ::foe (pick-foe input)))
-    (when f
-	  (f:hit *attack-strength*)
-	  (if (not (foes-dead?))
-	      (begin
-		(display "Foe #:")
-		(set! *input-fn* last-strike))
-	      (end-attack)))))
+  (let ((f (pick-foe input)))
+    (unless (eqv? #!null f)
+	    (f:hit *attack-strength*)
+	    (if (not (foes-dead?))
+		(begin
+		  (display "Foe #:")
+		  (set! *input-fn* last-strike))
+		(end-attack)))))
 
 (define (last-strike input)
-  (let ((f ::foe (pick-foe input)))
-    (when f
-	  (f:hit *attack-strength*)
-	  (end-attack))))
+  (let ((f (pick-foe input)))
+    (unless (eqv? #!null f)
+	    (f:hit *attack-strength*)
+	    (end-attack))))
 
 (define (end-attack)
   (set! *attacks-left* (- *attacks-left* 1))
@@ -134,22 +133,22 @@
   (+ 1 (random (max 1 n))))
 
 ;; Helper functions for player attacks
-(define (random-foe)
+(define (random-foe) ::foe
   (let ((f (list-ref *foes* (random (length *foes*)))))
     (if (foe-dead? f)
 	(random-foe)
 	f)))
 
-(define (pick-foe x)
+(define (pick-foe x) ::foe
   (if (not (and (integer? x) (>= x 1) (<= x *foes-num*)))
       (begin (display "That is not a valid foe number.\n")
 	     (display "Foe #:")
-	     #f)
+	     #!null)
       (let ((foe (list-ref *foes* (- x 1))))
 	(if (foe-dead? foe)
 	    (begin (display "That foe is already dead.\n")
 		   (display "Foe #:")
-		   #f)
+		   #!null)
 	    foe))))
 
 ;; Foe management functions
