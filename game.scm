@@ -1,13 +1,15 @@
 (require 'list-lib)
 
-(define *health* #f)
-(define *agility* #f)
-(define *strength* #f)
+;; Global variables
+(define *health* #!null)
+(define *agility* #!null)
+(define *strength* #!null)
 
 (define *foes* '())
 (define *foe-builders* '())
 (define *foes-num* 12)
 
+;; Utility functions
 (define (random n)
   (*:nextInt (java.util.Random) n))
 
@@ -22,15 +24,15 @@
 	 ((= counter max))
        body ...))))
 
+;; Main game functions
 (define (battle)
-  (newline)
   (init-foes)
   (init-player)
   (game-loop)
   (when (player-dead?)
-	(display "You have been killed. Game over."))
+	(display "\nYou have been killed. Game over."))
   (when (foes-dead?)
-	(display "Congratulations! You have vanquished all foes.")))
+	(display "\nCongratulations! You have vanquished all foes.")))
 
 (define (game-loop)
   (unless (or (player-dead?) (foes-dead?))
@@ -39,12 +41,13 @@
 		   (unless (foes-dead?)
 			   (show-foes)
 			   (player-attack)))
-	  (for-each (lambda (f)
+	  (for-each (lambda (f ::foe)
 		      (unless (foe-dead? f)
 			      (f:attack)))
 		    *foes*)
 	  (game-loop)))
 
+;; Player management functions
 (define (init-player)
   (set! *health* 30)
   (set! *agility* 30)
@@ -54,30 +57,30 @@
   (<= *health* 0))
 
 (define (show-player)
-  (display "Health: ")
+  (display "\nYou are a mystic monk with ")
   (display *health*)
-  (display " Agility: ")
+  (display " health, ")
   (display *agility*)
-  (display " Strength: ")
+  (display " agility, and ")
   (display *strength*)
-  (newline))
+  (display " strength.\n"))
 
 (define (player-attack)
-  (display "Attack style: [s]tab [d]ouble swing [r]oundhouse")
+  (display "Attack style: [k]i strike [d]ual strike [f]lurry of blows")
   (case (read)
-    ((s) (let ((x (+ 2 (randval (quotient *strength* 2)))))
-	   (display "Your stab has a strength of ")
+    ((k) (let ((x (+ 2 (randval (quotient *strength* 2)))))
+	   (display "Your ki strike has a strength of ")
 	   (display x)
 	   (newline)
 	   ((pick-foe):hit x)))
     ((d) (let ((x (randval (quotient *strength* 6))))
-	   (display "Your double swing has a strength of ")
+	   (display "Your dual strike has a strength of ")
 	   (display x)
 	   (newline)
 	   ((pick-foe):hit x)
 	   (unless (foes-dead?)
 		   ((pick-foe):hit x))))
-    ((r) (dotimes (x (+ 1 (randval (quotient *strength* 3))))
+    ((f) (dotimes (x (+ 1 (randval (quotient *strength* 3))))
 		  (unless (foes-dead?)
 			  ((random-foe):hit 1))))
     (else (player-attack))))
@@ -85,13 +88,14 @@
 (define (randval n)
   (+ 1 (random (max 1 n))))
 
-(define (random-foe)
+;; Helper functions for player attacks
+(define (random-foe) ::foe
   (let ((f (list-ref *foes* (random (length *foes*)))))
     (if (foe-dead? f)
 	(random-foe)
 	f)))
 
-(define (pick-foe)
+(define (pick-foe) ::foe
   (display "Foe #:")
   (let ((x (read)))
     (if (not (and (integer? x) (>= x 1) (<= x *foes-num*)))
@@ -103,6 +107,7 @@
 		     (pick-foe))
 	      f)))))
 
+;; Foe management functions
 (define (init-foes)
   (let ((build-foe (lambda (x)
 		     ((list-ref
@@ -110,7 +115,7 @@
 		       (random (length *foe-builders*)))))))
     (set! *foes* (list-tabulate *foes-num* build-foe))))
 
-(define (foe-dead? f)
+(define (foe-dead? f ::foe)
   (<= f:health 0))
 
 (define (foes-dead?)
@@ -119,7 +124,7 @@
 (define (show-foes)
   (display "Your foes:\n")
   (for-each (lambda (x)
-	      (let ((f (list-ref *foes* x)))
+	      (let ((f ::foe (list-ref *foes* x)))
 		(display (+ x 1))
 		(display ". ")
 		(if (foe-dead? f)
@@ -130,6 +135,7 @@
 			   (display (f:show))))))
 	    (list-tabulate *foes-num* values)))
 
+;; Foes
 (define-simple-class foe ()
   (health init-value: (randval 10))
   ((hit x)
@@ -146,7 +152,8 @@
   ((show)
    (display "A fierce ")
    (display (type-of (this)))
-   (newline)))
+   (newline))
+  ((attack) #!abstract))
 
 (define-simple-class orc (foe)
   (club-level init-value: (randval 8))
@@ -172,7 +179,7 @@
    (set! health (- health x))
    (if (foe-dead? (this))
        (display "The fully decapitated hydra falls to the floor!\n")
-       (begin (display "You lop off ")
+       (begin (display "You knock off ")
 	      (display x)
 	      (display " of the hydra's heads!\n"))))
   ((attack)
