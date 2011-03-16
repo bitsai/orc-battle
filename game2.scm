@@ -45,7 +45,7 @@
   (input-loop))
 
 (define (end-turn)
-  (for-each (lambda (f)
+  (for-each (lambda (f ::foe)
 	      (unless (foe-dead? f)
 		      (f:attack)))
 	    *foes*)
@@ -103,12 +103,13 @@
     ((f) (begin
 	   (dotimes (x (+ 1 (randval (quotient *strength* 3))))
 		    (unless (foes-dead?)
-			    ((random-foe):hit 1)))
+			    (let ((f ::foe (random-foe)))
+			      (f:hit 1))))
 	   (end-attack)))
     (else (show-attacks))))
 
 (define (first-strike input)
-  (let ((f (pick-foe input)))
+  (let ((f ::foe (pick-foe input)))
     (when f
 	  (f:hit *attack-strength*)
 	  (if (not (foes-dead?))
@@ -118,7 +119,7 @@
 	      (end-attack)))))
 
 (define (last-strike input)
-  (let ((f (pick-foe input)))
+  (let ((f ::foe (pick-foe input)))
     (when f
 	  (f:hit *attack-strength*)
 	  (end-attack))))
@@ -159,7 +160,7 @@
 		       (random (length *foe-builders*)))))))
     (set! *foes* (list-tabulate *foes-num* build-foe))))
 
-(define (foe-dead? f)
+(define (foe-dead? f ::foe)
   (<= f:health 0))
 
 (define (foes-dead?)
@@ -168,7 +169,7 @@
 (define (show-foes)
   (display "Your foes:\n")
   (for-each (lambda (x)
-	      (let ((f (list-ref *foes* x)))
+	      (let ((f ::foe (list-ref *foes* x)))
 		(display (+ x 1))
 		(display ". ")
 		(if (foe-dead? f)
@@ -196,7 +197,8 @@
   ((show)
    (display "A fierce ")
    (display (type-of (this)))
-   (newline)))
+   (newline))
+  ((attack) #!abstract))
 
 (define-simple-class orc (foe)
   (club-level init-value: (randval 8))
