@@ -1,17 +1,17 @@
 (require 'list-lib)
 
 ;; Global variables
-(define *health* #f)
-(define *agility* #f)
-(define *strength* #f)
+(define *health* #!null)
+(define *agility* #!null)
+(define *strength* #!null)
 
 (define *foes* '())
 (define *foe-builders* '())
 (define *foes-num* 12)
 
-(define *attacks-left* #f)
-(define *input-fn* #f)
-(define *attack-strength* #f)
+(define *attacks-left* #!null)
+(define *attack-strength* #!null)
+(define *input-fn* #!null)
 
 ;; Utility functions
 (define (random n)
