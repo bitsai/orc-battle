@@ -31,9 +31,9 @@
 (define *agility* ::integer #!null)
 (define *strength* ::integer #!null)
 
-(define *foes* '())
-(define *foe-builders* '())
-(define *foes-num* 12)
+(define *foes* ::list '())
+(define *foe-builders* ::list '())
+(define *foes-num* ::integer 12)
 
 (define *attacks-left* ::integer #!null)
 (define *attack-strength* ::integer #!null)
