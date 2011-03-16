@@ -126,8 +126,8 @@
 (define (end-attack)
   (set! *attacks-left* (- *attacks-left* 1))
   (if (or (zero? *attacks-left*) (foes-dead?))
-	(end-turn)
-	(new-attack)))
+      (end-turn)
+      (new-attack)))
 
 (define (randval n)
   (+ 1 (random (max 1 n))))
