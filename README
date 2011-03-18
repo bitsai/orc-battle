@@ -1,5 +1,2 @@
-DONE:
-- Game UI widgets
-
-TODO:
-- Convert logic to input-driven model, hook up to UI
+game1.scm: Straightforward port of 'Orc Battle' to Scheme
+game2.scm: Re-write of 'Orc Battle' in event-driven form, in case I ever find a Scheme that works on Android.
