@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	      android:layout_height="fill_parent"
+	      android:layout_width="fill_parent"
+	      android:orientation="vertical"
+	      android:name="main">
+  <ScrollView android:id="@+id/scroller"
+	      android:layout_height="wrap_content"
+	      android:layout_width="fill_parent"
+	      android:layout_weight="1">
+    <TextView android:id="@+id/display"
+	      android:layout_height="wrap_content"
+	      android:layout_width="fill_parent"/>
+  </ScrollView>
+  <LinearLayout android:orientation="horizontal"
+		android:layout_height="wrap_content"
+		android:layout_width="fill_parent"
+		android:layout_gravity="bottom">
+    <EditText android:id="@+id/input"
+	      android:layout_height="wrap_content"
+	      android:layout_width="wrap_content"
+	      android:layout_weight="1"/>
+    <Button android:id="@+id/enter"
+	    android:layout_height="wrap_content"
+	    android:layout_width="wrap_content"
+	    android:text="Enter"
+	    android:onClick="onEnter"/>
+  </LinearLayout>
+</LinearLayout>
