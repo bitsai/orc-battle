@@ -19,7 +19,8 @@
     <EditText android:id="@+id/input"
 	      android:layout_height="wrap_content"
 	      android:layout_width="wrap_content"
-	      android:layout_weight="1"/>
+	      android:layout_weight="1"
+	      android:inputType="text"/>
     <Button android:id="@+id/enter"
 	    android:layout_height="wrap_content"
 	    android:layout_width="wrap_content"

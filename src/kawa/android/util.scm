@@ -1,7 +1,7 @@
 (define (rand-int n)
   (*:nextInt (java.util.Random) n))
 
-(define (rand-nth-list lst)
+(define (rand-nth lst)
   (list-ref lst (rand-int (length lst))))
 
 (define-syntax dolist
@@ -41,3 +41,6 @@
     (dolist (x xs)
 	    (display x o))
     (get-output-string o)))
+
+(define (read-string s)
+  (read (open-input-string s)))

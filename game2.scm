@@ -112,7 +112,7 @@
 
 ;; Helper functions for player attacks
 (define (random-foe) ::foe
-  (let ((f (rand-nth-list *foes*)))
+  (let ((f (rand-nth *foes*)))
     (if (foe-dead? f)
 	(random-foe)
 	f)))
@@ -122,17 +122,17 @@
       (begin (output "That is not a valid foe number.\n")
 	     (output "Foe #:")
 	     #!null)
-      (let ((foe (list-ref *foes* (dec x))))
-	(if (foe-dead? foe)
+      (let ((f (list-ref *foes* (dec x))))
+	(if (foe-dead? f)
 	    (begin (output "That foe is already dead.\n")
 		   (output "Foe #:")
 		   #!null)
-	    foe))))
+	    f))))
 
 ;; Foe management functions
 (define (init-foes)
   (set! *foe-builders* (list orc hydra slime brigand))
-  (let ((init-random-foe (lambda (_) ((rand-nth-list *foe-builders*)))))
+  (let ((init-random-foe (lambda (_) ((rand-nth *foe-builders*)))))
     (set! *foes* (list-tabulate *foes-num* init-random-foe))))
 
 (define (foe-dead? f ::foe)

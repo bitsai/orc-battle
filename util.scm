@@ -4,7 +4,7 @@
 (define (rand-int n)
   (*:nextInt (java.util.Random) n))
 
-(define (rand-nth-list lst)
+(define (rand-nth lst)
   (list-ref lst (rand-int (length lst))))
 
 (define-syntax dolist
