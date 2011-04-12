@@ -1,2 +1,0 @@
-game1.scm: Straightforward port of 'Orc Battle' to Scheme
-game2.scm: Re-write of 'Orc Battle' in event-driven form, in case I ever find a Scheme that works on Android.
