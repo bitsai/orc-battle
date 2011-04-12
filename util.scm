@@ -1,5 +1,8 @@
-(define (output . xs)
-  (display (apply str xs)))
+(define (randval n)
+  (inc (rand-int (max 1 n))))
+
+(define (type-of obj)
+  (*:getName (*:getClass obj)))
 
 (define (rand-int n)
   (*:nextInt (java.util.Random) n))
@@ -9,37 +12,35 @@
 
 (define-syntax dolist
   (syntax-rules ()
-    ((dolist (counter init) body ...)
-     (for-each (lambda (counter)
+    ((dolist (x lst) body ...)
+     (for-each (lambda (x)
 		 body ...)
-	       init))
-    ((dolist (counter ::type init) body ...)
-     (for-each (lambda (counter ::type)
+	       lst))
+    ((dolist (x ::type lst) body ...)
+     (for-each (lambda (x ::type)
 		 body ...)
-	       init))))
+	       lst))))
 
 (define-syntax dotimes
   (syntax-rules ()
-    ((dotimes (counter init) body ...)
+    ((dotimes (x init) body ...)
      (do ((max init)
-	  (counter 0 (inc counter)))
-	 ((= counter max))
+	  (x 0 (inc x)))
+	 ((= x max))
        body ...))))
-
-(define (inc n)
-  (+ n 1))
 
 (define (dec n)
   (- n 1))
 
-(define (nil? x)
-  (eqv? #!null x))
-
-(define (type-of obj)
-  (*:getName (*:getClass obj)))
+(define (inc n)
+  (+ n 1))
 
 (define (str . xs)
   (let ((o (open-output-string)))
-    (dolist (x xs)
-	    (display x o))
+    (for-each (lambda (x) (display x o)) xs)
     (get-output-string o)))
+
+(define-syntax swap!
+  (syntax-rules ()
+    ((swap! x f args ...)
+     (set! x (f x args ...)))))
