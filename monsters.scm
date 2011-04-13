@@ -50,8 +50,8 @@
      (output "A slime wraps around your legs and decreases your agility by " x "!\n")
      (swap! *player-agility* - x)
      (when (zero? (rand-int 2))
-       (output "It also squirts in your face, taking away 1 health point!\n")
-       (swap! *player-health* dec)))))
+	   (output "It also squirts in your face, taking away 1 health point!\n")
+	   (swap! *player-health* dec)))))
 
 (define-simple-class brigand (monster)
   ((attack)

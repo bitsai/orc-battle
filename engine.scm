@@ -27,10 +27,6 @@
 (define (new-turn)
   (show-player)
   (set! *attacks-left* (inc (quotient (max 0 *player-agility*) 15)))
-  (new-attack))
-
-(define (new-attack)
-  (show-monsters)
   (pick-attack))
 
 (define (input-loop)
@@ -46,7 +42,7 @@
   (swap! *attacks-left* dec)
   (if (or (zero? *attacks-left*) (monsters-dead?))
       (end-turn)
-      (new-attack)))
+      (pick-attack)))
 
 (define (end-turn)
   (dolist (m ::monster (remove monster-dead? *monsters*))
@@ -75,28 +71,30 @@
   (output "You are a mystic monk with "
           *player-health* " health, "
           *player-agility* " agility, and "
-          *player-strength* " strength\n"))
+          *player-strength* " strength.\n"))
 
 (define (pick-attack)
+  (show-monsters)
   (output "Attack style: [k]i strike [d]ual strike [f]lurry of blows")
   (set! *input-state* 'pick-attack))
 
 (define (process-attack input)
   (case input
     ((k) (let ((x (+ 2 (randval (quotient *player-strength* 2)))))
-	   (output "Your ki strike has a strength of " x "\n")
+	   (output "Your ki strike has a strength of " x ".\n")
            (set! *hits-left* 1)
 	   (set! *hit-strength* x)
            (pick-target)))
     ((d) (let ((x (randval (quotient *player-strength* 6))))
-	   (output "Your dual strike has a strength of " x "\n")
+	   (output "Your dual strike has a strength of " x ".\n")
 	   (set! *hits-left* 2)
            (set! *hit-strength* x)
            (pick-target)))
     ((f) (begin (dotimes (_ (inc (randval (quotient *player-strength* 3))))
 			 (unless (monsters-dead?)
 				 ((random-monster):hit 1)))
-		(end-attack)))))
+		(end-attack)))
+    (else (output "That is not a valid attack.\n"))))
 
 (define (pick-target)
   (output "Monster #:")
@@ -120,11 +118,11 @@
 
 (define (pick-monster x) ::monster
   (if (not (and (integer? x) (>= x 1) (<= x *monster-num*)))
-      (begin (output "That is not a valid monster number\n")
+      (begin (output "That is not a valid monster number.\n")
 	     #!null)
       (let ((m (list-ref *monsters* (dec x))))
 	(if (monster-dead? m)
-	    (begin (output "That monster is already dead\n")
+	    (begin (output "That monster is already dead.\n")
 		   #!null)
 	    m))))
 
