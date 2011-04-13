@@ -8,19 +8,19 @@
 (define *player-agility* #f)
 (define *player-strength* #f)
 
-(define *foes* '())
-(define *foe-builders* '())
-(define *foes-num* 12)
+(define *monsters* '())
+(define *monster-builders* '())
+(define *monster-num* 12)
 
-(define *attacks-left* #f)
-(define *strikes-left* #f)
-(define *strike-strength* #f)
 (define *input-state* #f)
+(define *attacks-left* #f)
+(define *hits-left* #f)
+(define *hit-strength* #f)
 
 ;; Main game functions
 (define (new-game)
+  (init-monsters)
   (init-player)
-  (init-foes)
   (new-turn)
   (input-loop))
 
@@ -29,28 +29,37 @@
   (set! *attacks-left* (inc (quotient (max 0 *player-agility*) 15)))
   (new-attack))
 
+(define (new-attack)
+  (show-monsters)
+  (pick-attack))
+
 (define (input-loop)
-  (input-fn (read))
+  (process-input (read))
   (input-loop))
 
-(define (input-fn input)
+(define (process-input input)
   (case *input-state*
-    ((choose-attack) (choose-attack input))
-    ((choose-target) (choose-target input))))
+    ((pick-attack) (process-attack input))
+    ((pick-target) (process-target input))))
+
+(define (end-attack)
+  (swap! *attacks-left* dec)
+  (if (or (zero? *attacks-left*) (monsters-dead?))
+      (end-turn)
+      (new-attack)))
 
 (define (end-turn)
-  (dolist (f ::foe *foes*)
-	  (unless (f:dead?)
-		  (output (f:attack))))
-  (if (or (player-dead?) (foes-dead?))
+  (dolist (m ::monster (remove monster-dead? *monsters*))
+          (m:attack))
+  (if (or (player-dead?) (monsters-dead?))
       (end-game)
       (new-turn)))
 
 (define (end-game)
   (when (player-dead?)
 	(output "You have been killed. Game over."))
-  (when (foes-dead?)
-	(output "Congratulations! You have vanquished all foes."))
+  (when (monsters-dead?)
+	(output "Congratulations! You have vanquished all of your foes."))
   (exit))
 
 ;; Player management functions
@@ -64,86 +73,78 @@
 
 (define (show-player)
   (output "You are a mystic monk with "
-	  *player-health* " health, "
-	  *player-agility* " agility, and "
-	  *player-strength* " strength.\n"))
+          *player-health* " health, "
+          *player-agility* " agility, and "
+          *player-strength* " strength\n"))
 
-(define (new-attack)
-  (show-foes)
-  (show-attacks)
-  (set! *input-state* 'choose-attack))
+(define (pick-attack)
+  (output "Attack style: [k]i strike [d]ual strike [f]lurry of blows")
+  (set! *input-state* 'pick-attack))
 
-(define (show-attacks)
-  (output "Attack style: [k]i strike [d]ual strike [f]lurry of blows"))
-
-(define (choose-attack input)
+(define (process-attack input)
   (case input
     ((k) (let ((x (+ 2 (randval (quotient *player-strength* 2)))))
 	   (output "Your ki strike has a strength of " x "\n")
-	   (output "Foe #:")
-	   (set! *strikes-left* 1)
-	   (set! *strike-strength* x)
-	   (set! *input-state* 'choose-target)))
+           (set! *hits-left* 1)
+	   (set! *hit-strength* x)
+           (pick-target)))
     ((d) (let ((x (randval (quotient *player-strength* 6))))
 	   (output "Your dual strike has a strength of " x "\n")
-	   (output "Foe #:")
-	   (set! *strikes-left* 2)
-	   (set! *strike-strength* x)
-	   (set! *input-state* 'choose-target)))
+	   (set! *hits-left* 2)
+           (set! *hit-strength* x)
+           (pick-target)))
     ((f) (begin (dotimes (_ (inc (randval (quotient *player-strength* 3))))
-			 (unless (foes-dead?)
-				 (output ((random-foe):hit 1))))
-		(end-attack)))
-    (else (show-attacks))))
+			 (unless (monsters-dead?)
+				 ((random-monster):hit 1)))
+		(end-attack)))))
 
-(define (choose-target input)
-  (let ((f (get-foe input)))
-    (unless (eqv? f #!null)
-	    (output (f:hit *strike-strength*))
-	    (swap! *strikes-left* dec)
-	    (if (or (zero? *strikes-left*) (foes-dead?))
+(define (pick-target)
+  (output "Monster #:")
+  (set! *input-state* 'pick-target))
+
+(define (process-target input)
+  (let ((m (pick-monster input)))
+    (unless (eqv? m #!null)
+	    (m:hit *hit-strength*)
+	    (swap! *hits-left* dec)
+	    (if (or (zero? *hits-left*) (monsters-dead?))
 		(end-attack)
-		(output "Foe #:")))))
-
-(define (end-attack)
-  (swap! *attacks-left* dec)
-  (if (or (zero? *attacks-left*) (foes-dead?))
-      (end-turn)
-      (new-attack)))
+		(pick-target)))))
 
 ;; Helper functions for player attacks
-(define (random-foe) ::foe
-  (let ((f ::foe (rand-nth *foes*)))
-    (if (f:dead?)
-	(random-foe)
-	f)))
+(define (random-monster) ::monster
+  (let ((m (rand-nth *monsters*)))
+    (if (monster-dead? m)
+	(random-monster)
+	m)))
 
-(define (get-foe input) ::foe
-  (if (not (and (integer? input) (>= input 1) (<= input *foes-num*)))
-      (begin (output "That is not a valid foe number.\n")
-	     (output "Foe #:")
+(define (pick-monster x) ::monster
+  (if (not (and (integer? x) (>= x 1) (<= x *monster-num*)))
+      (begin (output "That is not a valid monster number\n")
 	     #!null)
-      (let ((f ::foe (list-ref *foes* (dec input))))
-	(if (f:dead?)
-	    (begin (output "That foe is already dead.\n")
-		   (output "Foe #:")
+      (let ((m (list-ref *monsters* (dec x))))
+	(if (monster-dead? m)
+	    (begin (output "That monster is already dead\n")
 		   #!null)
-	    f))))
+	    m))))
 
-;; Foe management functions
-(define (init-foes)
-  (set! *foe-builders* (list orc hydra slime brigand))
-  (let ((init-rand-foe (lambda (_) ((rand-nth *foe-builders*)))))
-    (set! *foes* (list-tabulate *foes-num* init-rand-foe))))
+;; Monster management functions
+(define (init-monsters)
+  (set! *monster-builders* (list orc hydra slime brigand))
+  (let ((init-rand-monster (lambda (_) ((rand-nth *monster-builders*)))))
+    (set! *monsters* (list-tabulate *monster-num* init-rand-monster))))
 
-(define (foes-dead?)
-  (every (lambda (f ::foe) (f:dead?)) *foes*))
+(define (monster-dead? m ::monster)
+  (<= m:health 0))
 
-(define (show-foes)
+(define (monsters-dead?)
+  (every monster-dead? *monsters*))
+
+(define (show-monsters)
   (output "Your foes:\n")
-  (dolist (x (iota *foes-num*))
-	  (let ((f ::foe (list-ref *foes* x)))
-	    (output (inc x) ". ")
-	    (if (f:dead?)
+  (dolist (x (iota *monster-num*))
+	  (let ((m ::monster (list-ref *monsters* x)))
+	    (output "  " (inc x) ". ")
+	    (if (monster-dead? m)
 		(output "**dead**\n")
-		(output "(Health = " f:health ") " (f:show) "\n")))))
+		(output "(Health = " m:health ") " (m:show) "\n")))))
