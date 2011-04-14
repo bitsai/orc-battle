@@ -4,11 +4,11 @@
 	      android:layout_width="fill_parent"
 	      android:orientation="vertical"
 	      android:name="main">
-  <ScrollView android:id="@+id/scroller"
+  <ScrollView android:id="@+id/sv"
 	      android:layout_height="wrap_content"
 	      android:layout_width="fill_parent"
 	      android:layout_weight="1">
-    <TextView android:id="@+id/display"
+    <TextView android:id="@+id/tv"
 	      android:layout_height="wrap_content"
 	      android:layout_width="fill_parent"/>
   </ScrollView>
@@ -16,15 +16,34 @@
 		android:layout_height="wrap_content"
 		android:layout_width="fill_parent"
 		android:layout_gravity="bottom">
+    <Button android:id="@+id/ki"
+	    android:layout_height="wrap_content"
+	    android:layout_width="fill_parent"
+	    android:layout_weight="1"
+	    android:text="k"
+	    android:onClick="ki"/>
+    <Button android:id="@+id/dual"
+	    android:layout_height="wrap_content"
+	    android:layout_width="fill_parent"
+	    android:layout_weight="1"
+	    android:text="d"
+	    android:onClick="dual"/>
+    <Button android:id="@+id/flurry"
+	    android:layout_height="wrap_content"
+	    android:layout_width="fill_parent"
+	    android:layout_weight="1"
+	    android:text="f"
+	    android:onClick="flurry"/>
     <EditText android:id="@+id/input"
 	      android:layout_height="wrap_content"
-	      android:layout_width="wrap_content"
+	      android:layout_width="fill_parent"
 	      android:layout_weight="1"
-	      android:inputType="text"/>
+	      android:inputType="number"/>
     <Button android:id="@+id/enter"
 	    android:layout_height="wrap_content"
-	    android:layout_width="wrap_content"
+	    android:layout_width="fill_parent"
+	    android:layout_weight="1"
 	    android:text="Enter"
-	    android:onClick="onEnter"/>
+	    android:onClick="enter"/>
   </LinearLayout>
 </LinearLayout>
