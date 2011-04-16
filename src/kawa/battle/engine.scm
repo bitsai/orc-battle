@@ -1,5 +1,5 @@
 (require 'list-lib)
-(require "battle.scm")
+(require "ui.scm")
 (require "util.scm")
 
 ;; Global variables

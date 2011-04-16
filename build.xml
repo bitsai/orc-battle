@@ -89,9 +89,9 @@
           <pathelement path="${out.classes.absolute.dir}"/>
 	</classpath>
        <arg value="-d"/> <arg path="${out.classes.absolute.dir}"/>
-       <arg line="-P kawa.android. --warn-undefined-variable --module-static-run --warn-invoke-unknown-method --warn-as-error"/>
+       <arg line="-P kawa.battle. --warn-undefined-variable --module-static-run --warn-invoke-unknown-method --warn-as-error"/>
        <arg value="-C"/>
-       <arg file="src/kawa/android/battle.scm"/>
+       <arg file="src/kawa/battle/ui.scm"/>
 <!--       <fileset dir=".">
          <include name="**/*.scm"/>
        </fileset>

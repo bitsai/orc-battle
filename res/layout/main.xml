@@ -8,7 +8,7 @@
 	      android:layout_height="wrap_content"
 	      android:layout_width="fill_parent"
 	      android:layout_weight="1">
-    <TextView android:id="@+id/tv"
+    <TextView android:id="@+id/outText"
 	      android:layout_height="wrap_content"
 	      android:layout_width="fill_parent"/>
   </ScrollView>
@@ -16,25 +16,25 @@
 		android:layout_height="wrap_content"
 		android:layout_width="fill_parent"
 		android:layout_gravity="bottom">
-    <Button android:id="@+id/ki"
+    <Button android:id="@+id/kiAttack"
 	    android:layout_height="wrap_content"
 	    android:layout_width="fill_parent"
 	    android:layout_weight="1"
 	    android:text="k"
-	    android:onClick="ki"/>
-    <Button android:id="@+id/dual"
+	    android:onClick="onClickAttack"/>
+    <Button android:id="@+id/dualAttack"
 	    android:layout_height="wrap_content"
 	    android:layout_width="fill_parent"
 	    android:layout_weight="1"
 	    android:text="d"
-	    android:onClick="dual"/>
-    <Button android:id="@+id/flurry"
+	    android:onClick="onClickAttack"/>
+    <Button android:id="@+id/flurryAttack"
 	    android:layout_height="wrap_content"
 	    android:layout_width="fill_parent"
 	    android:layout_weight="1"
 	    android:text="f"
-	    android:onClick="flurry"/>
-    <EditText android:id="@+id/input"
+	    android:onClick="onClickAttack"/>
+    <EditText android:id="@+id/inText"
 	      android:layout_height="wrap_content"
 	      android:layout_width="fill_parent"
 	      android:layout_weight="1"
@@ -44,6 +44,6 @@
 	    android:layout_width="fill_parent"
 	    android:layout_weight="1"
 	    android:text="Enter"
-	    android:onClick="enter"/>
+	    android:onClick="onClickEnter"/>
   </LinearLayout>
 </LinearLayout>

@@ -3,7 +3,7 @@
 
 (define (type-of obj)
   (let ((n (*:getName (*:getClass obj))))
-    (substring n (string-length "kawa.android.") (string-length n))))
+    (substring n (string-length "kawa.battle.") (string-length n))))
 
 (define (rand-int n)
   (*:nextInt (java.util.Random) n))
@@ -35,6 +35,9 @@
 
 (define (inc n)
   (+ n 1))
+
+(define (read-string s)
+  (read (open-input-string s)))
 
 (define (str . xs)
   (let ((o (open-output-string)))
