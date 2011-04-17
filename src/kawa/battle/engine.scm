@@ -9,7 +9,7 @@
 
 (define *monsters* '())
 (define *monster-builders* '())
-(define *monster-num* 12)
+(define *monster-num* 9)
 
 (define *input-state* #f)
 (define *attacks-left* #f)
@@ -28,9 +28,10 @@
   (pick-attack))
 
 (define (process-input input)
-  (case *input-state*
-    ((pick-attack) (process-attack input))
-    ((pick-target) (process-target input))))
+  (unless (or (player-dead?) (monsters-dead?))
+    (case *input-state*
+      ((pick-attack) (process-attack input))
+      ((pick-target) (process-target input)))))
 
 (define (end-attack)
   (swap! *attacks-left* dec)
@@ -49,7 +50,7 @@
   (when (player-dead?)
     (output "You have been killed. Game over.\n"))
   (when (monsters-dead?)
-    (output "Congratulations! You have vanquished all of your foes.\n")))
+    (output "Congratulations! You have vanquished all foes.\n")))
 
 ;; Player management functions
 (define (init-player)
@@ -61,29 +62,29 @@
   (<= *player-health* 0))
 
 (define (show-player)
-  (output "You are a mystic monk with "
+  (output "[Mystic Monk] "
           *player-health* " health, "
-          *player-agility* " agility, and "
-          *player-strength* " strength.\n"))
+          *player-agility* " agility, "
+          *player-strength* " strength\n"))
 
 (define (pick-attack)
   (show-monsters)
-  (output "Attack style: [k]i strike [d]ual strike [f]lurry of blows\n")
+  (output "Attack style: [K]i strike [D]ual strike [F]lurry of blows\n")
   (set! *input-state* 'pick-attack))
 
 (define (process-attack input)
   (case input
-    ((k) (let ((x (+ 2 (randval (quotient *player-strength* 2)))))
+    ((K) (let ((x (+ 2 (randval (quotient *player-strength* 2)))))
 	   (output "Your ki strike has a strength of " x ".\n")
            (set! *hits-left* 1)
 	   (set! *hit-strength* x)
            (pick-target)))
-    ((d) (let ((x (randval (quotient *player-strength* 6))))
+    ((D) (let ((x (randval (quotient *player-strength* 6))))
 	   (output "Your dual strike has a strength of " x ".\n")
 	   (set! *hits-left* 2)
            (set! *hit-strength* x)
            (pick-target)))
-    ((f) (begin (dotimes (_ (inc (randval (quotient *player-strength* 3))))
+    ((F) (begin (dotimes (_ (inc (randval (quotient *player-strength* 3))))
 			 (unless (monsters-dead?)
                            ((random-monster):hit 1)))
 		(end-attack)))
@@ -117,7 +118,8 @@
 	(if (monster-dead? m)
 	    (begin (output "That monster is already dead.\n")
 		   #!null)
-	    m))))
+            (begin (output x "\n")
+                   m)))))
 
 ;; Monster management functions
 (define (init-monsters)
@@ -138,7 +140,7 @@
 	    (output "  " (inc x) ". ")
 	    (if (monster-dead? m)
 		(output "**dead**\n")
-		(output "(Health = " m:health ") " (m:show) "\n")))))
+		(output "(Health = " m:health ") " (m:show))))))
 
 ;; The monsters
 (define-simple-class monster ()
@@ -149,9 +151,9 @@
    (swap! health - x)
    (if (monster-dead? (this))
        (output "You killed the " (type-of (this)) "!\n")
-       (output "You hit the " (type-of (this)) ", knocking off " x " health points!\n")))
+       (output "You hit the " (type-of (this)) " for " x " health!\n")))
   ((show)
-   (str "A fierce " (type-of (this))))
+   (str "A fierce " (type-of (this)) "\n"))
   ((attack)
    #!abstract))
 
@@ -161,23 +163,24 @@
    (invoke-special monster (this) '*init*)
    (set! club-level (randval 8)))
   ((show)
-   (str "A wicked orc with a level " club-level " club"))
+   (str "A wicked orc with a level " club-level " club\n"))
   ((attack)
    (let ((x (randval club-level)))
-     (output "An orc swings his club at you and knocks off " x " of your health points!\n")
+     (output "An orc swings his club at you for " x " health!\n")
      (swap! *player-health* - x))))
 
 (define-simple-class hydra (monster)
   ((show)
-   (str "A malicious hydra with " health " heads"))
+   (str "A malicious hydra with " health " heads\n"))
   ((hit x)
    (swap! health - x)
    (if (monster-dead? (this))
-       (output "The corpse of the fully decapitated and decapacitated hydra falls to the floor!\n")
+       (output "The fully decapitated hydra falls to the floor!\n")
        (output "You knock off " x " of the hydra's heads!\n")))
   ((attack)
    (let ((x (randval (quotient health 2))))
-     (output "A hydra attacks you with " x " of its heads! It also grows back 1 more head!\n")
+     (output "A hydra attacks you with " x " of its heads!\n")
+     (output "It also grows back 1 more head!\n")
      (swap! health inc)
      (swap! *player-health* - x))))
 
@@ -187,24 +190,24 @@
    (invoke-special monster (this) '*init*)
    (set! sliminess (randval 5)))
   ((show)
-   (str "A slime with a sliminess of " sliminess))
+   (str "A slime with a sliminess of " sliminess "\n"))
   ((attack)
    (let ((x (randval sliminess)))
-     (output "A slime wraps around your legs and decreases your agility by " x "!\n")
+     (output "A slime wraps around your legs for " x " agility!\n")
      (swap! *player-agility* - x)
      (when (zero? (rand-int 2))
-       (output "It also squirts in your face, taking away 1 health point!\n")
+       (output "It also squirts in your face for 1 health!\n")
        (swap! *player-health* dec)))))
 
 (define-simple-class brigand (monster)
   ((attack)
    (let ((x (max *player-health* *player-agility* *player-strength*)))
      (cond ((= x *player-health*)
-            (output "A brigand hits you with his slingshot, taking off 2 health points!\n")
+            (output "A brigand hits with his slingshot for 2 health!\n")
 	    (swap! *player-health* - 2))
 	   ((= x *player-agility*)
-            (output "A brigand catches your leg with his whip, taking off 2 agility points!\n")
+            (output "A brigand whips your leg for 2 agility!\n")
 	    (swap! *player-agility* - 2))
 	   ((= x *player-strength*)
-            (output "A brigand cuts your arm with his whip, taking off 2 strength points!\n")
+            (output "A brigand whips your arm for 2 strength!\n")
 	    (swap! *player-strength* - 2))))))
