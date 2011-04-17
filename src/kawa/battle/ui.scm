@@ -2,9 +2,14 @@
 (require "engine.scm")
 (require "util.scm")
 
-(define *sv* ::android.widget.ScrollView #!null)
-(define *outText* ::android.widget.TextView #!null)
-(define *inText* ::android.widget.EditText #!null)
+(define-alias Button android.widget.Button)
+(define-alias EditText android.widget.EditText)
+(define-alias ScrollView android.widget.ScrollView)
+(define-alias TextView android.widget.TextView)
+(define-alias View android.view.View)
+
+(define *sv* ::ScrollView #!null)
+(define *outText* ::TextView #!null)
 
 (activity
  battle
@@ -12,15 +17,14 @@
   ((this):setContentView kawa.battle.R$layout:main)
   (set! *sv* ((this):findViewById kawa.battle.R$id:sv))
   (set! *outText* ((this):findViewById kawa.battle.R$id:outText))
-  (set! *inText* ((this):findViewById kawa.battle.R$id:inText))
   (new-game))
- ((onClickAttack v ::android.view.View)
-  (process-input (read-string (as android.widget.Button v):text)))
- ((onClickEnter v ::android.view.View)
-  (process-input (string->number *inText*:text))
-  (*inText*:setText "")))
+ ((onClickAttack v ::View)
+  (process-input (read-string (as Button v):text)))
+ ((onClickEnter v ::View)
+  (let ((inText ::EditText ((this):findViewById kawa.battle.R$id:inText)))
+    (process-input (string->number inText:text))
+    (inText:setText ""))))
 
 (define (output . xs)
   (*outText*:append (apply str xs))
-  (*sv*:post (lambda ()
-               (*sv*:fullScroll android.widget.ScrollView:FOCUS_DOWN))))
+  (*sv*:post (lambda () (*sv*:fullScroll ScrollView:FOCUS_DOWN))))
