@@ -4,8 +4,7 @@
 
 (define *sv* ::android.widget.ScrollView #!null)
 (define *outText* ::android.widget.TextView #!null)
-(define *inText* ::android.widget.EditText #!null)
-(define *imm* ::android.view.inputmethod.InputMethodManager #!null)
+(define *targetBtn* ::android.widget.Button #!null)
 
 (activity
  battle
@@ -13,15 +12,16 @@
   ((this):setContentView kawa.battle.R$layout:main)
   (set! *sv* ((this):findViewById kawa.battle.R$id:sv))
   (set! *outText* ((this):findViewById kawa.battle.R$id:outText))
-  (set! *inText* ((this):findViewById kawa.battle.R$id:inText))
-  (set! *imm* (getSystemService android.content.Context:INPUT_METHOD_SERVICE))
+  (set! *targetBtn* ((this):findViewById kawa.battle.R$id:target))
   (new-game))
- ((onClickAttack v ::android.view.View)
+ ((onClick v ::android.view.View)
   (process-input (read-string (as android.widget.Button v):text)))
- ((onClickEnter v ::android.view.View)
-  (process-input (string->number *inText*:text))
-  (*inText*:setText "")
-  (*imm*:hideSoftInputFromWindow (*inText*:getWindowToken) 0)))
+ ((onNextTarget v ::android.view.View)
+  (let ((x (string->number *targetBtn*:text)))
+    (*targetBtn*:setText (number->string (inc x)))))
+ ((onPrevTarget v ::android.view.View)
+  (let ((x (string->number *targetBtn*:text)))
+    (*targetBtn*:setText (number->string (dec x))))))
 
 (define (output . xs)
   (*outText*:append (apply str xs))

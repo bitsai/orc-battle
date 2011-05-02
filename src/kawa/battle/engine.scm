@@ -9,7 +9,7 @@
 
 (define *monsters* '())
 (define *monster-builders* '())
-(define *monster-num* 9)
+(define *monster-num* 12)
 
 (define *input-state* #f)
 (define *attacks-left* #f)
@@ -62,29 +62,29 @@
   (<= *player-health* 0))
 
 (define (show-player)
-  (output "[Mystic Monk] "
+  (output "[Valiant Knight] "
           *player-health* " health, "
           *player-agility* " agility, "
           *player-strength* " strength\n"))
 
 (define (pick-attack)
   (show-monsters)
-  (output "Attack style: [K]i strike [D]ual strike [F]lurry of blows\n")
+  (output "Attack style: [S]tab [D]ouble swing [R]oundhouse\n")
   (set! *input-state* 'pick-attack))
 
 (define (process-attack input)
   (case input
-    ((K) (let ((x (+ 2 (randval (quotient *player-strength* 2)))))
-	   (output "Your ki strike has a strength of " x ".\n")
+    ((S) (let ((x (+ 2 (randval (quotient *player-strength* 2)))))
+	   (output "Your stab has a strength of " x ".\n")
            (set! *hits-left* 1)
 	   (set! *hit-strength* x)
            (pick-target)))
     ((D) (let ((x (randval (quotient *player-strength* 6))))
-	   (output "Your dual strike has a strength of " x ".\n")
+	   (output "Your double swing has a strength of " x ".\n")
 	   (set! *hits-left* 2)
            (set! *hit-strength* x)
            (pick-target)))
-    ((F) (begin (dotimes (_ (inc (randval (quotient *player-strength* 3))))
+    ((R) (begin (dotimes (_ (inc (randval (quotient *player-strength* 3))))
 			 (unless (monsters-dead?)
                            ((random-monster):hit 1)))
 		(end-attack)))
@@ -176,7 +176,7 @@
    (swap! health - x)
    (if (monster-dead? (this))
        (output "The fully decapitated hydra falls to the floor!\n")
-       (output "You knock off " x " of the hydra's heads!\n")))
+       (output "You lop off " x " of the hydra's heads!\n")))
   ((attack)
    (let ((x (randval (quotient health 2))))
      (output "A hydra attacks you with " x " of its heads!\n")
