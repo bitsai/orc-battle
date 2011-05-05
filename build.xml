@@ -84,7 +84,7 @@
     <target name="scompile" depends="-resource-src, -aidl">
       <java failonerror="true" fork="true" classname="kawa.repl">
 	<classpath>
-	  <pathelement path="libs/kawa-1.11.jar"/>
+	  <pathelement path="libs/kawa.jar"/>
 	  <pathelement path="${sdk.dir}/platforms/${target}/android.jar"/>
           <pathelement path="${out.classes.absolute.dir}"/>
 	</classpath>
