@@ -25,19 +25,24 @@
 (define (new-turn)
   (show-player)
   (set! *attacks-left* (inc (quotient (max 0 *player-agility*) 15)))
-  (pick-attack))
+  (new-attack))
+
+(define (new-attack)
+  (show-monsters)
+  (get-attack))
 
 (define (process-input input)
   (unless (or (player-dead?) (monsters-dead?))
+    (output input "\n")
     (case *input-state*
-      ((pick-attack) (process-attack input))
-      ((pick-target) (process-target input)))))
+      ((get-attack) (process-attack input))
+      ((get-monster) (process-monster input)))))
 
 (define (end-attack)
   (swap! *attacks-left* dec)
   (if (or (zero? *attacks-left*) (monsters-dead?))
       (end-turn)
-      (pick-attack)))
+      (new-attack)))
 
 (define (end-turn)
   (dolist (m ::monster (remove monster-dead? *monsters*))
@@ -67,10 +72,9 @@
           *player-agility* " agility, "
           *player-strength* " strength\n"))
 
-(define (pick-attack)
-  (show-monsters)
+(define (get-attack)
   (output "Attack style: [S]tab [D]ouble swing [R]oundhouse\n")
-  (set! *input-state* 'pick-attack))
+  (set! *input-state* 'get-attack))
 
 (define (process-attack input)
   (case input
@@ -78,30 +82,31 @@
 	   (output "Your stab has a strength of " x ".\n")
            (set! *hits-left* 1)
 	   (set! *hit-strength* x)
-           (pick-target)))
+           (get-monster)))
     ((D) (let ((x (randval (quotient *player-strength* 6))))
 	   (output "Your double swing has a strength of " x ".\n")
 	   (set! *hits-left* 2)
            (set! *hit-strength* x)
-           (pick-target)))
+           (get-monster)))
     ((R) (begin (dotimes (_ (inc (randval (quotient *player-strength* 3))))
 			 (unless (monsters-dead?)
                            ((random-monster):hit 1)))
 		(end-attack)))
-    (else (output "That is not a valid attack.\n"))))
+    (else (begin (output "That is not a valid attack.\n")
+                 (get-attack)))))
 
-(define (pick-target)
+(define (get-monster)
   (output "Monster #:\n")
-  (set! *input-state* 'pick-target))
+  (set! *input-state* 'get-monster))
 
-(define (process-target input)
+(define (process-monster input)
   (let ((m (pick-monster input)))
     (unless (eqv? m #!null)
       (m:hit *hit-strength*)
       (swap! *hits-left* dec)
       (if (or (zero? *hits-left*) (monsters-dead?))
           (end-attack)
-          (pick-target)))))
+          (get-monster)))))
 
 ;; Helper functions for player attacks
 (define (random-monster) ::monster
@@ -113,13 +118,14 @@
 (define (pick-monster x) ::monster
   (if (not (and (integer? x) (>= x 1) (<= x *monster-num*)))
       (begin (output "That is not a valid monster number.\n")
-	     #!null)
+	     (get-monster)
+             #!null)
       (let ((m (list-ref *monsters* (dec x))))
 	(if (monster-dead? m)
 	    (begin (output "That monster is already dead.\n")
-		   #!null)
-            (begin (output x "\n")
-                   m)))))
+		   (get-monster)
+                   #!null)
+            m))))
 
 ;; Monster management functions
 (define (init-monsters)

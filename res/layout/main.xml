@@ -31,7 +31,7 @@
 	    android:layout_weight="1"
 	    android:text="R"
 	    android:onClick="onClick"/>
-    <Button android:id="@+id/target"
+    <Button android:id="@+id/monsterBtn"
 	    android:layout_height="wrap_content"
 	    android:layout_width="fill_parent"
 	    android:layout_weight="1"
@@ -41,11 +41,11 @@
 	    android:layout_width="fill_parent"
 	    android:layout_weight="1"
 	    android:text="+"
-	    android:onClick="onNextTarget"/>
+	    android:onClick="onNextMonster"/>
     <Button android:layout_height="wrap_content"
 	    android:layout_width="fill_parent"
 	    android:layout_weight="1"
 	    android:text="-"
-	    android:onClick="onPrevTarget"/>
+	    android:onClick="onPrevMonster"/>
   </LinearLayout>
 </LinearLayout>
