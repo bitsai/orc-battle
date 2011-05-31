@@ -58,6 +58,9 @@
     (output "Congratulations! You have vanquished all foes.\n")))
 
 ;; Player management functions
+(define (randval n)
+  (inc (rand-int (max 1 n))))
+
 (define (init-player)
   (set! *player-health* 30)
   (set! *player-agility* 30)
@@ -149,6 +152,10 @@
 		(output "(Health = " m:health ") " (m:show))))))
 
 ;; The monsters
+(define (type-of obj)
+  (let ((n (*:getName (*:getClass obj))))
+    (substring n (string-length "kawa.battle.") (string-length n))))
+
 (define-simple-class monster ()
   (health)
   ((*init*)

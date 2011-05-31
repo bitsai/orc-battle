@@ -1,16 +1,3 @@
-(define (randval n)
-  (inc (rand-int (max 1 n))))
-
-(define (type-of obj)
-  (let ((n (*:getName (*:getClass obj))))
-    (substring n (string-length "kawa.battle.") (string-length n))))
-
-(define (rand-int n)
-  (*:nextInt (java.util.Random) n))
-
-(define (rand-nth lst)
-  (list-ref lst (rand-int (length lst))))
-
 (define-syntax dolist
   (syntax-rules ()
     ((dolist (x lst) body ...)
@@ -35,6 +22,12 @@
 
 (define (inc n)
   (+ n 1))
+
+(define (rand-int n)
+  (*:nextInt (java.util.Random) n))
+
+(define (rand-nth lst)
+  (list-ref lst (rand-int (length lst))))
 
 (define (read-string s)
   (read (open-input-string s)))
