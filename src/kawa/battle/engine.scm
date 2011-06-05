@@ -45,17 +45,19 @@
       (new-attack)))
 
 (define (end-turn)
+  (output "\n")
   (dolist (m ::monster (remove monster-dead? *monsters*))
           (m:attack))
+  (output "\n")
   (if (or (player-dead?) (monsters-dead?))
       (end-game)
       (new-turn)))
 
 (define (end-game)
-  (when (player-dead?)
-    (output "You have been killed. Game over.\n"))
-  (when (monsters-dead?)
-    (output "Congratulations! You have vanquished all foes.\n")))
+  (cond ((player-dead?)
+         (output "You have been killed. Game over.\n"))
+        ((monsters-dead?)
+         (output "Congratulations! You have vanquished all foes.\n"))))
 
 ;; Player management functions
 (define (randval n)
@@ -132,9 +134,9 @@
 
 ;; Monster management functions
 (define (init-monsters)
-  (set! *monster-builders* (list orc hydra slime brigand))
-  (let ((init-rand-monster (lambda (_) ((rand-nth *monster-builders*)))))
-    (set! *monsters* (list-tabulate *monster-num* init-rand-monster))))
+  (let* ((make-random-monster (lambda (_) ((rand-nth *monster-builders*))))
+         (new-monsters (list-tabulate *monster-num* make-random-monster)))
+    (set! *monsters* new-monsters)))
 
 (define (monster-dead? m ::monster)
   (<= m:health 0))
@@ -146,15 +148,15 @@
   (output "Your foes:\n")
   (dolist (x (iota *monster-num*))
 	  (let ((m ::monster (list-ref *monsters* x)))
-	    (output "  " (inc x) ". ")
+	    (output (inc x) ". ")
 	    (if (monster-dead? m)
 		(output "**dead**\n")
 		(output "(Health = " m:health ") " (m:show))))))
 
 ;; The monsters
-(define (type-of obj)
-  (let ((n (*:getName (*:getClass obj))))
-    (substring n (string-length "kawa.battle.") (string-length n))))
+(define (class-name m)
+  (let ((name (*:getName (*:getClass m))))
+    (substring name (string-length "kawa.battle.") (string-length name))))
 
 (define-simple-class monster ()
   (health)
@@ -163,10 +165,10 @@
   ((hit x)
    (swap! health - x)
    (if (monster-dead? (this))
-       (output "You killed the " (type-of (this)) "!\n")
-       (output "You hit the " (type-of (this)) " for " x " health!\n")))
+       (output "You killed the " (class-name (this)) "!\n")
+       (output "You hit the " (class-name (this)) " for " x " health!\n")))
   ((show)
-   (str "A fierce " (type-of (this)) "\n"))
+   (str "A fierce " (class-name (this)) "\n"))
   ((attack)
    #!abstract))
 
@@ -181,6 +183,7 @@
    (let ((x (randval club-level)))
      (output "An orc swings his club at you for " x " health!\n")
      (swap! *player-health* - x))))
+(swap! *monster-builders* conj orc)
 
 (define-simple-class hydra (monster)
   ((show)
@@ -196,6 +199,7 @@
      (output "It also grows back 1 more head!\n")
      (swap! (this):health inc)
      (swap! *player-health* - x))))
+(swap! *monster-builders* conj hydra)
 
 (define-simple-class slime (monster)
   (sliminess)
@@ -211,6 +215,7 @@
      (when (zero? (rand-int 2))
        (output "It also squirts in your face for 1 health!\n")
        (swap! *player-health* dec)))))
+(swap! *monster-builders* conj slime)
 
 (define-simple-class brigand (monster)
   ((attack)
@@ -224,3 +229,4 @@
 	   ((= x *player-strength*)
             (output "A brigand whips your arm for 2 strength!\n")
 	    (swap! *player-strength* - 2))))))
+(swap! *monster-builders* conj brigand)

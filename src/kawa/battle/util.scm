@@ -1,3 +1,6 @@
+(define (conj lst x)
+  (cons x lst))
+
 (define-syntax dolist
   (syntax-rules ()
     ((dolist (x lst) body ...)
