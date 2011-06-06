@@ -45,9 +45,10 @@
       (new-attack)))
 
 (define (end-turn)
-  (output "\n")
-  (dolist (m ::monster (remove monster-dead? *monsters*))
-          (m:attack))
+  (unless (monsters-dead?)
+    (output "\n")
+    (dolist (m ::monster (remove monster-dead? *monsters*))
+            (m:attack)))
   (output "\n")
   (if (or (player-dead?) (monsters-dead?))
       (end-game)
