@@ -26,8 +26,10 @@
 (define (inc n)
   (+ n 1))
 
+(define *rand* (java.util.Random))
+
 (define (rand-int n)
-  (*:nextInt (java.util.Random) n))
+  (*rand*:nextInt n))
 
 (define (rand-nth lst)
   (list-ref lst (rand-int (length lst))))
