@@ -2,17 +2,17 @@
 (require "engine.scm")
 (require "util.scm")
 
-(define *sv* ::android.widget.ScrollView #!null)
-(define *outText* ::android.widget.TextView #!null)
-(define *monsterBtn* ::android.widget.Button #!null)
+(define *scroll-view* ::android.widget.ScrollView #!null)
+(define *text-view* ::android.widget.TextView #!null)
+(define *monster-btn* ::android.widget.Button #!null)
 
 (activity
- battle
+ ui
  (on-create
   ((this):setContentView kawa.battle.R$layout:main)
-  (set! *sv* ((this):findViewById kawa.battle.R$id:sv))
-  (set! *outText* ((this):findViewById kawa.battle.R$id:outText))
-  (set! *monsterBtn* ((this):findViewById kawa.battle.R$id:monsterBtn))
+  (set! *scroll-view* ((this):findViewById kawa.battle.R$id:scroll_view))
+  (set! *text-view* ((this):findViewById kawa.battle.R$id:text_view))
+  (set! *monster-btn* ((this):findViewById kawa.battle.R$id:monster_btn))
   (new-game))
  ((onClick v ::android.view.View)
   (process-input (read-string (as android.widget.Button v):text)))
@@ -22,10 +22,11 @@
   (change-monster dec)))
 
 (define (change-monster f)
-  (let ((x (string->number *monsterBtn*:text)))
-    (*monsterBtn*:setText (number->string (f x)))))
+  (let ((x (string->number *monster-btn*:text)))
+    (*monster-btn*:setText (number->string (f x)))))
 
 (define (output . xs)
-  (*outText*:append (apply str xs))
-  (*sv*:post (lambda ()
-               (*sv*:fullScroll android.widget.ScrollView:FOCUS_DOWN))))
+  (*text-view*:append (apply str xs))
+  (*scroll-view*:post
+   (lambda ()
+     (*scroll-view*:fullScroll android.widget.ScrollView:FOCUS_DOWN))))
