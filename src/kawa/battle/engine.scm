@@ -47,8 +47,8 @@
 (define (end-turn)
   (unless (monsters-dead?)
     (output "\n")
-    (dolist (m ::monster (remove monster-dead? *monsters*))
-            (m:attack)))
+    (dolist (m (remove monster-dead? *monsters*))
+            ((as monster m):attack)))
   (output "\n")
   (if (or (player-dead?) (monsters-dead?))
       (end-game)
@@ -94,10 +94,11 @@
 	   (set! *hits-left* 2)
            (set! *hit-strength* x)
            (get-monster)))
-    ((R) (begin (dotimes (_ (inc (randval (quotient *player-strength* 3))))
-			 (unless (monsters-dead?)
-                           ((random-monster):hit 1)))
-		(end-attack)))
+    ((R) (let ((x (inc (randval (quotient *player-strength* 3)))))
+           (dotimes (_ x)
+                    (unless (monsters-dead?)
+                      ((as monster (random-monster)):hit 1)))
+           (end-attack)))
     (else (begin (output "That is not a valid attack.\n")
                  (get-attack)))))
 
@@ -106,7 +107,7 @@
   (set! *input-state* 'get-monster))
 
 (define (process-monster input)
-  (let ((m (pick-monster input)))
+  (let ((m (as monster (pick-monster input))))
     (unless (eqv? m #!null)
       (m:hit *hit-strength*)
       (swap! *hits-left* dec)
@@ -115,13 +116,13 @@
           (get-monster)))))
 
 ;; Helper functions for player attacks
-(define (random-monster) ::monster
+(define (random-monster)
   (let ((m (rand-nth *monsters*)))
     (if (monster-dead? m)
 	(random-monster)
 	m)))
 
-(define (pick-monster x) ::monster
+(define (pick-monster x)
   (if (not (and (integer? x) (>= x 1) (<= x *monster-num*)))
       (begin (output "That is not a valid monster number.\n")
 	     (get-monster)
@@ -135,12 +136,12 @@
 
 ;; Monster management functions
 (define (init-monsters)
-  (let* ((make-random-monster (lambda (_) ((rand-nth *monster-builders*))))
-         (new-monsters (list-tabulate *monster-num* make-random-monster)))
+  (let* ((get-rand-monster (lambda (_) ((rand-nth *monster-builders*))))
+         (new-monsters (list-tabulate *monster-num* get-rand-monster)))
     (set! *monsters* new-monsters)))
 
-(define (monster-dead? m ::monster)
-  (<= m:health 0))
+(define (monster-dead? m)
+  (<= (as monster m):health 0))
 
 (define (monsters-dead?)
   (every monster-dead? *monsters*))
@@ -148,30 +149,33 @@
 (define (show-monsters)
   (output "Your foes:\n")
   (dolist (x (iota *monster-num*))
-	  (let ((m ::monster (list-ref *monsters* x)))
+	  (let ((m (as monster (list-ref *monsters* x))))
 	    (output (inc x) ". ")
 	    (if (monster-dead? m)
 		(output "**dead**\n")
 		(output "(Health = " m:health ") " (m:show))))))
 
 ;; The monsters
-(define (class-name m)
-  (let ((name (*:getName (*:getClass m))))
-    (substring name (string-length "kawa.battle.") (string-length name))))
+(define (type-of x)
+  (let* ((prefix-len (string-length "kawa.battle.engine$"))
+         (suffix-len (string-length "$class"))
+         (full-name (*:getName (*:getClass x)))
+         (name-len (- (string-length full-name) prefix-len suffix-len)))
+    (substring full-name prefix-len (+ prefix-len name-len))))
 
-(define-simple-class monster ()
+(define-class monster ()
   (health init-form: (randval 10))
   ((hit x)
    (swap! health - x)
    (if (monster-dead? (this))
-       (output "You killed the " (class-name (this)) "!\n")
-       (output "You hit the " (class-name (this)) " for " x " health!\n")))
+       (output "You killed the " (type-of (this)) "!\n")
+       (output "You hit the " (type-of (this)) " for " x " health!\n")))
   ((show)
-   (str "A fierce " (class-name (this)) "\n"))
+   (str "A fierce " (type-of (this)) "\n"))
   ((attack)
    #!abstract))
 
-(define-simple-class orc (monster)
+(define-class orc (monster)
   (club-level init-form: (randval 8))
   ((show)
    (str "A wicked orc with a level " club-level " club\n"))
@@ -181,7 +185,7 @@
      (swap! *player-health* - x))))
 (swap! *monster-builders* conj orc)
 
-(define-simple-class hydra (monster)
+(define-class hydra (monster)
   ((show)
    (str "A malicious hydra with " (this):health " heads\n"))
   ((hit x)
@@ -197,7 +201,7 @@
      (swap! *player-health* - x))))
 (swap! *monster-builders* conj hydra)
 
-(define-simple-class slime (monster)
+(define-class slime (monster)
   (sliminess init-form: (randval 5))
   ((show)
    (str "A slime with a sliminess of " sliminess "\n"))
@@ -210,7 +214,7 @@
        (swap! *player-health* dec)))))
 (swap! *monster-builders* conj slime)
 
-(define-simple-class brigand (monster)
+(define-class brigand (monster)
   ((attack)
    (let ((x (max *player-health* *player-agility* *player-strength*)))
      (cond ((= x *player-health*)

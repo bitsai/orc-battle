@@ -6,10 +6,6 @@
     ((dolist (x lst) body ...)
      (for-each (lambda (x)
 		 body ...)
-	       lst))
-    ((dolist (x ::type lst) body ...)
-     (for-each (lambda (x ::type)
-		 body ...)
 	       lst))))
 
 (define-syntax dotimes
