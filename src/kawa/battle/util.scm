@@ -1,6 +1,12 @@
 (define (conj lst x)
   (cons x lst))
 
+(define (dec n)
+  (- n 1))
+
+(define (inc n)
+  (+ n 1))
+
 (define-syntax dolist
   (syntax-rules ()
     ((dolist (x lst) body ...)
@@ -16,13 +22,7 @@
 	 ((= x max))
        body ...))))
 
-(define (dec n)
-  (- n 1))
-
-(define (inc n)
-  (+ n 1))
-
-(define *rand* (java.util.Random))
+(define *rand* ::java.util.Random (java.util.Random))
 
 (define (rand-int n)
   (*rand*:nextInt n))

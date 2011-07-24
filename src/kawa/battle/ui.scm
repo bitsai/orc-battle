@@ -1,5 +1,5 @@
 (require 'android-defs)
-(require "engine.scm")
+(require "orc-battle.scm")
 (require "util.scm")
 
 (define *scroll-view* ::android.widget.ScrollView #!null)
@@ -26,7 +26,7 @@
     (*monster-btn*:setText (number->string (f x)))))
 
 (define (output . xs)
-  (*text-view*:append (apply str xs))
+  (*text-view*:append (string-append (apply str xs) "\n"))
   (*scroll-view*:post
    (lambda ()
      (*scroll-view*:fullScroll android.widget.ScrollView:FOCUS_DOWN))))
