@@ -1,4 +1,3 @@
-For general information on how to compile and deploy the code, see:
-http://per.bothner.com/blog/2010/AndroidHelloScheme/
+[How to compile and deploy the code](http://per.bothner.com/blog/2010/AndroidHelloScheme/)
 
-NOTE: Kawa (1.11 or later) needs to be placed in {project dir}/libs/kawa.jar.
+Kawa (1.11 or later) needs to be placed in libs/kawa.jar.
