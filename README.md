@@ -1,3 +1,3 @@
-[How to compile and deploy the code](http://per.bothner.com/blog/2010/AndroidHelloScheme/)
+[Instructions on how to build and deploy the application](http://per.bothner.com/blog/2010/AndroidHelloScheme/).
 
-Kawa (1.11 or later) needs to be placed in libs/kawa.jar.
+IMPORTANT: When building Kawa from source, please use [the latest development sources](http://www.gnu.org/s/kawa/Getting-Kawa.html#Getting-the-development-sources-using-SVN).
